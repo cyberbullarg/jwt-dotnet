@@ -1,6 +1,9 @@
 using AuthAPIService.Config;
-using AuthAPIService.Services;
+using AuthAPIService.Context.Persistence;
+using AuthAPIService.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -35,7 +38,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
-builder.Services.AddScoped<UserService>();
+builder.Services.AddDbContext<ApplicationContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationContext>()
+                .AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
